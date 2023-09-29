@@ -1,6 +1,5 @@
 import functools
 import operator
-import os
 import random
 
 import tabulate
@@ -134,14 +133,6 @@ class NimState:
                 temp_heaps[index] = items_count - number
                 if ((items_count - number) % (self.max_to_take + 1)) == 0:
                     return index, number
-
-                # Этот код чтобы наверняка, но пока не буду использовать
-
-                # success = functools.reduce(operator.xor, map(lambda x: x % (self.max_to_take + 1), temp_heaps)) == 0
-                # if success:
-                #     return index, number
-
-        # Сюда можем попасть только, если не нашли решение
 
         raise ValueError(f'Не удалось найти подходящее число. {total_xor = }')
 
