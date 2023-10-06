@@ -1,6 +1,7 @@
 import pytest
 
-from modulus_div import div_modulus_euclid, power_mod, div_modulus_fermat
+from modulus_div import div_modulus_euclid, div_modulus_fermat
+from utils import power_mod
 
 
 @pytest.mark.parametrize('a, b, p, expected', [

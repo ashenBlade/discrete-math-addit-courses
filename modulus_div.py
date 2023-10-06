@@ -1,3 +1,6 @@
+from utils import power_mod
+
+
 def calculate_gcd_extended(a, b):
     """
     Рассчитать НОД по расширенному алгоритму, возвращая кортеж: НОД(a, b), x, y
@@ -10,18 +13,6 @@ def calculate_gcd_extended(a, b):
     x = prev_y - (b // a) * prev_x
     y = prev_x
     return g, x, y
-
-
-def power_mod(number, power, modulus):
-    def get_bits(): return (x == '1' for x in bin(power))
-
-    result = 1
-    for b in get_bits():
-        result = (result ** 2) % modulus
-        if b:
-            result = (result * number) % modulus
-
-    return result
 
 
 def get_input():
