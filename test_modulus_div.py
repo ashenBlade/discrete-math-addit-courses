@@ -26,8 +26,6 @@ def test_modulus_fermat(a, b, p, expected):
     assert actual == expected, f"{a}*x % {p} == {b}. Ожидался {expected}. Рассчитан {actual}"
 
 
-
-
 @pytest.mark.parametrize('n, p, m, expected', [
     (2, 3, 5, 3),
     (123, 4567, 2456, 771),
