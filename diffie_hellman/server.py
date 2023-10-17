@@ -1,12 +1,15 @@
 import logging
-
+import socket
 
 from diffie_hellman import accept_client
 
 
+logging.basicConfig(level=logging.DEBUG)
+
+
 def main():
     logging.info('Начинаю принимать клиентов')
-    with accept_client() as client:
+    with accept_client(host=socket.gethostname()) as client:
         while True:
             answer = client.receive()
             print(f'> {answer}')

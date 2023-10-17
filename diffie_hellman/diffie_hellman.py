@@ -1,17 +1,23 @@
 import logging
+import sys
 from contextlib import contextmanager
 from itertools import cycle
 from random import randint
 import socket
 from typing import ContextManager
 
+from generator_finder import get_generator
 from utils import power_mod
 
-# Общее число, в которое возводится степень
-BASE = 245622132
 
 # Число Мерсена (4 байтное, для удобства)
-POWER_PRIME = 2 ** 31 - 1
+# https://ru.wikipedia.org/wiki/Список_простых_чисел
+POWER_PRIME = 162259276829213363391578010288127  # 107 бит
+
+# Общее число, в которое возводится степень - генератор
+BASE = get_generator(POWER_PRIME)
+
+MSG_SIZE = 16
 
 
 class DiffieHellmanClient:
@@ -19,7 +25,7 @@ class DiffieHellmanClient:
     private_key: list[int]
 
     def __init__(self, private_key: int, sock: socket):
-        self.private_key = private_key.to_bytes(4)
+        self.private_key = list(private_key.to_bytes(MSG_SIZE, byteorder=sys.byteorder))  # 128 байт
         self.socket = sock
 
     def __aenter__(self):
@@ -57,11 +63,11 @@ def accept_client(host: str = '0.0.0.0', port: int = 8080) -> ContextManager[Dif
         with sock as sock:
             server_socket.close()
 
-            logging.debug('Подключился клиент с адреса %o. Читаю его число', addr)
-            client_number = int.from_bytes(sock.recv(4))
+            logging.debug('Подключился клиент с адреса %s. Читаю его число', addr)
+            client_number = int.from_bytes(sock.recv(MSG_SIZE))
             logging.debug('Число клиента получено. Отправляю свое')
             powered = power_mod(BASE, my_power, POWER_PRIME)
-            sock.send(powered.to_bytes(4))
+            sock.send(powered.to_bytes(MSG_SIZE))
 
             private_key = power_mod(client_number, my_power, POWER_PRIME)
             yield DiffieHellmanClient(private_key, sock)
@@ -77,14 +83,14 @@ def connect_to_server(host: str = '0.0.0.0', port: int = 8080) -> ContextManager
     my_power = randint(1, 10000000000)
 
     # Отправляем его на сервер и получаем его ключ
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.SOL_TCP) as sock:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         logging.debug('Подключаюсь по адресу %s:%i', host, port)
         sock.connect((host, port))
         logging.debug("Отправляю свой ключ на сервер. Ключ: %i", my_power)
         powered = power_mod(BASE, my_power, POWER_PRIME)
-        sock.send(powered.to_bytes(4))
+        sock.send(powered.to_bytes(MSG_SIZE))
         logging.debug('Получаю ключ сервера')
-        data = sock.recv(4)
+        data = sock.recv(MSG_SIZE)
         server_number = int.from_bytes(data)
         private_key = power_mod(server_number, my_power, POWER_PRIME)
         logging.debug('Рассчитанный ключ %i', private_key)

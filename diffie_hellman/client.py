@@ -1,12 +1,14 @@
 import logging
-
+import socket
 
 from diffie_hellman import connect_to_server
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 def main():
     logging.info('Подключаюсь к серверу')
-    with connect_to_server() as client:
+    with connect_to_server(host=socket.gethostname()) as client:
         while True:
             question = input('> ')
             client.send(question)
