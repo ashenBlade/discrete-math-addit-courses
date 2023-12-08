@@ -72,3 +72,37 @@ def get_max_clique_size(graph) -> int:
         if clique_size > max_clique_size:
             max_clique_size = clique_size
     return max_clique_size
+
+
+def color_chordal_graph(graph):
+    """
+    Раскрасить хордальный граф
+    """
+    if len(graph) == 0:
+        return []
+
+    all_possible_colors = set(range(len(graph)))
+
+    # 1. PEO
+    # 2. Разворот
+    vertices_peo = sort_lbfs(graph)
+
+    # Отображение - узел на его цвет
+    result = {}
+    # 3. Каждый узел красим наименьшим цветом, который не был у наших соседей
+    for i, u in enumerate(vertices_peo):
+        # Находим всех соседей "справа" т.е. те которых уже прошли
+        u_neighbors = set(graph[u]).intersection(vertices_peo[:i])
+        neighbor_colors = set()
+        # Получаем какие у них цвета
+        for neighbor in u_neighbors:
+            try:
+                neighbor_colors.add(result[neighbor])
+            except KeyError:
+                pass
+
+        # Находим наименьший цвет из всех возможных
+        result[u] = min(all_possible_colors - set(neighbor_colors))
+
+    return result
+
