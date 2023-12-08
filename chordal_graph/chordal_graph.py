@@ -42,5 +42,33 @@ def is_chordal(graph):
                 neighbors_u.remove(v)
                 if not neighbors_u.issubset(neighbors_v):
                     return False
-
     return True
+
+
+def get_max_clique_size(graph) -> int:
+    """
+    Найти клику максимального размера
+    """
+
+    assert is_chordal(graph)
+
+    if len(graph) == 0:
+        return 0
+
+    if len(graph) == 1:
+        return 1
+
+    # 1. Выполняем лексикографическую сортировку графа
+    reversed_bfs_order = sort_lbfs(graph)[::-1]
+    max_clique_size = 1
+
+    # 2. Обходим каждую клику в поисках максимальной по размеру
+    for i, u in enumerate(reversed_bfs_order):
+        # Находим всех соседей "слева"
+        u_neighbors = set(graph[u]).intersection(reversed_bfs_order[i + 1:])
+        # По теореме, все соседи "слева" вместе с текущим узлом образуют клику
+        clique_size = len(u_neighbors) + 1
+        # Проверяем превышение размера клики
+        if clique_size > max_clique_size:
+            max_clique_size = clique_size
+    return max_clique_size
